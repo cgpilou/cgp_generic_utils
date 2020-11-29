@@ -1,0 +1,29 @@
+
+{
+    "env" :
+    [
+        {
+            "CGP_GENERIC_UTILS_ROOT" : ".../cgp_generic_utils"
+        },
+
+        {
+            "XBMLANGPATH" :
+            {
+                "value": "CGP_GENERIC_UTILS_ROOT/icons",
+                "method": "append"
+            },
+
+            "PYTHONPATH" :
+            {
+                "value": "CGP_GENERIC_UTILS_ROOT/python",
+                "method": "append"
+            },
+
+            "HOUDINI_PATH" :
+            {
+                "value": "CGP_GENERIC_UTILS_ROOT/scripts",
+                "method": "append"
+            }
+        }
+    ]
+}
