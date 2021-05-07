@@ -5,9 +5,9 @@ python file object library
 # imports python
 import json
 import imp
+import cPickle
 
 # imports local
-import cgp_generic_utils.constants
 from . import _generic
 
 
@@ -55,15 +55,70 @@ class JsonFile(_generic.File):
     # COMMANDS #
 
     def read(self):
-        """read the ui file
+        """read the json file
 
-        :return: the content of the ui file
+        :return: the content of the json file
         :rtype: any
         """
 
         # get state form config file
         with open(self.path(), 'r') as toRead:
             data = json.load(toRead)
+
+        # return
+        return data
+
+
+class PklFile(_generic.File):
+    """file object that manipulate a ``.pkl`` file on the file system
+    """
+
+    # ATTRIBUTES #
+
+    _extension = 'pkl'
+
+    # OBJECT COMMANDS #
+
+    @classmethod
+    def create(cls, path, content=None, **__):
+        """create a pkl file
+
+        :param path: path of the pkl file
+        :type path: str
+
+        :param content: content of the pkl file
+        :type content: any
+
+        :return: the created pkl file
+        :rtype: :class:`cgp_generic_utils.files.PklFile`
+        """
+
+        # errors
+        if not _generic.Path(path).extension() == cls._extension:
+            raise ValueError('{0} is not a PklFile path'.format(path))
+
+        # get content
+        content = content or {}
+
+        # execute
+        with open(path, 'wb') as toWrite:
+            cPickle.dump(content, toWrite)
+
+        # return
+        return cls(path)
+
+    # COMMANDS #
+
+    def read(self):
+        """read the pkl file
+
+        :return: the content of the pkl file
+        :rtype: any
+        """
+
+        # get state form config file
+        with open(self.path(), 'rb') as toRead:
+            data = cPickle.load(toRead)
 
         # return
         return data
