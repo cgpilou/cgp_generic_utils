@@ -20,12 +20,16 @@ class Timer(_abstract.Decorator):
     """decorator returning the execution time of the encapsulated script block / function
     """
 
-    def __init__(self):
+    def __init__(self, label=None):
         """Timer class initialization
+
+        :param label: text that will be attached to the timer result
+        :type label: str
         """
 
         # init
         self._initialTime = None
+        self._label = label
 
     def __enter__(self):
         """enter Timer decorator
@@ -42,7 +46,7 @@ class Timer(_abstract.Decorator):
         finalTime = time.time() - self._initialTime
 
         # return
-        print 'Timer : {0} seconds'.format(finalTime)
+        print '{0} : {1} seconds'.format(self._label or 'Timer', finalTime)
 
 
 class Profiler(_abstract.Decorator):
