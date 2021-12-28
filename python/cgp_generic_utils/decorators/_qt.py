@@ -8,7 +8,7 @@ import cgp_generic_utils.qt
 
 
 class StatusDialog(_abstract.Decorator):
-    """StatusDialog class
+    """decorator poping a status dialog
     """
 
     def __init__(self, loadDescription, closeDescription, title, size=None, parent=None, isFrameless=False):

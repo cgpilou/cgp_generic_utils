@@ -782,7 +782,7 @@ class LineEditDialog(BaseDialog):
 
 
 class StatusDialog(BaseDialog):
-    """StatusDialog class
+    """dialog displaying current status
     """
 
     # SIGNALS #
