@@ -4,6 +4,7 @@ dialog library
 
 # imports python
 import collections
+import time
 
 # imports third-parties
 import PySide2.QtWidgets
@@ -778,6 +779,125 @@ class LineEditDialog(BaseDialog):
 
         # execute
         return [str(lineEdit.text()) for lineEdit in self.__lineEdits]
+
+
+class StatusDialog(BaseDialog):
+    """StatusDialog class
+    """
+
+    # SIGNALS #
+
+    statusChanged = PySide2.QtCore.Signal(str)
+
+    # INIT #
+
+    def __init__(self, title, size=None, parent=None, isFrameless=False):
+        """StatusDialog class initialization
+
+        :param title: the title of the dialog
+        :type title: str
+
+        :param size: values of the width and the height ``[width - height]`` - default is ``[None, None]``
+        :type size: list[int]
+
+        :param parent: QWidget to parent the line edit dialog to
+        :type parent: :class:`PySide2.QtWidgets.QWidget`
+
+        :param isFrameless: ``True`` : dialog is frameless - ``False`` : dialog has a frame
+        :type isFrameless: bool
+        """
+
+        # init
+        super(StatusDialog, self).__init__(title,
+                                           '',
+                                           size=size,
+                                           parent=parent,
+                                           isFrameless=isFrameless,
+                                           orientation=cgp_generic_utils.constants.Orientation.HORIZONTAL)
+
+        # hide buttons and label
+        self.setButtonDisplayed(False)
+
+        # set focus policy
+        self.setFocusPolicy(PySide2.QtCore.Qt.NoFocus)
+
+        # label
+        self.descriptionLabel = PySide2.QtWidgets.QLabel(self)
+        self.descriptionLabel.setAlignment(PySide2.QtCore.Qt.AlignCenter)
+
+        # add widgets
+        for widget in [self.descriptionLabel]:
+            self.contentLayout().addWidget(widget)
+
+        # setup connections
+        self._setupConnections()
+
+    def _setupConnections(self):
+        """setup connections
+        """
+
+        # execute
+        self.statusChanged.connect(self._setDescription)
+
+    # COMMANDS #
+
+    def close(self, description, closeTime=1):
+        """close status dialog
+
+        :param description: description to set before the dialog closes
+        :type description: str
+
+        :param closeTime: time in seconds before the dialog closes
+        :type closeTime: float
+        """
+
+        # emit
+        self.statusChanged.emit(description)
+
+        # time sleep
+        time.sleep(0.1)
+        PySide2.QtWidgets.QApplication.processEvents()
+        time.sleep(closeTime)
+
+        # close
+        super(StatusDialog, self).close()
+
+    def keyPressEvent(self, event):
+        """override keyPressEvent
+        """
+
+        # execute
+        pass
+
+    def load(self, description):
+        """load status dialog
+
+        :param description: description to set when the dialog is loaded
+        :type description: str
+        """
+
+        # show dialog
+        self.show()
+
+        # emit
+        self.statusChanged.emit(description)
+
+        # refresh
+        time.sleep(0.1)
+        PySide2.QtWidgets.QApplication.processEvents()
+
+    # PROTECTED COMMANDS #
+
+    @PySide2.QtCore.Slot(str)
+    def _setDescription(self, description):
+        """set description of the dialog
+
+        :param description: set the description of the dialog
+        :type description: str
+        """
+
+        # execute
+        self.descriptionLabel.setText(description)
 
 
 class TextEditDialog(BaseDialog):
