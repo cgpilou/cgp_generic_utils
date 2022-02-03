@@ -8,34 +8,47 @@ import cgp_generic_utils.qt
 
 
 class StatusDialog(_abstract.Decorator):
-    """decorator poping a status dialog
+    """decorator popping a status dialog
     """
 
-    def __init__(self, loadDescription, closeDescription, title, size=None, parent=None, isFrameless=False):
+    def __init__(self, loadDescription,
+                 validDescription,
+                 errorDescription,
+                 title,
+                 size=None,
+                 parent=None,
+                 isFrameless=False):
         """StatusDialog class initialization
 
         :param loadDescription: description to set when the dialog is loaded
         :type loadDescription: str
 
-        :param closeDescription: description to set when the dialog closes
-        :type closeDescription: str
+        :param validDescription: description to set when the dialog closes with no occurring errors
+        :type validDescription: str
+
+        :param errorDescription: description to set when the dialog closes with errors
+        :type errorDescription: str
         """
 
         # init
         self.loadDescription = loadDescription
-        self.closeDescription = closeDescription
+        self.validDescription = validDescription
+        self.errorDescription = errorDescription
         self.dialog = cgp_generic_utils.qt.StatusDialog(title, size=size, parent=parent, isFrameless=isFrameless)
 
     def __enter__(self):
-        """enter DisableAutokey decorator
+        """enter StatusDialog decorator
         """
 
         # execute
         self.dialog.load(self.loadDescription)
 
-    def __exit__(self, *args, **kwargs):
-        """exit DisableAutokey decorator
+    def __exit__(self, exceptionType, *args, **kwargs):
+        """exit StatusDialog decorator
         """
 
-        # execute
-        self.dialog.close(self.closeDescription)
+        # get description
+        description = self.validDescription if exceptionType is None else self.errorDescription
+
+        # close dialog
+        self.dialog.close(description)
