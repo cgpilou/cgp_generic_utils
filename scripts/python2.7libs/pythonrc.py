@@ -1,8 +1,5 @@
 """
-package : cgp_generic_utils
-file : pythonrc.py
-
-description : cgp_generic_utils startup
+cgp_generic_utils startup
 """
 
-print 'cgp_generic_utils - pythonrc.py : loaded '
+print 'cgp_generic_utils - pythonrc.py : loaded'

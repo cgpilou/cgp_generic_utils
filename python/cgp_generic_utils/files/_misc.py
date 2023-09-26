@@ -6,8 +6,9 @@ miscellaneous file object library
 import os
 
 # imports local
-import cgp_generic_utils.constants
+import cgp_generic_utils.python
 from . import _generic, _python
+from . import _api
 
 
 # MISC FILE OBJECTS #
@@ -33,21 +34,21 @@ class UiFile(_generic.File):
     # OBJECT COMMANDS #
 
     @classmethod
-    def create(cls, path, content=None, **__):
-        """create a ui file
+    def create(cls, path, content=None, **kwargs):
+        """create a uiFile
 
-        :param path: path of the ui file
+        :param path: path of the uiFile
         :type path: str
 
-        :param content: content of the ui file
-        :type content: any
+        :param content: content to set into the uiFile
+        :type content: Any
 
-        :return: the created ui file
+        :return: the created uiFile
         :rtype: :class:`cgp_generic_utils.files.UiFile`
         """
 
         # errors
-        if not _generic.Path(path).extension() == cls._extension:
+        if not _api.getExtension(path) == cls._extension:
             raise ValueError('{0} is not a UiFile path'.format(path))
 
         # get content
@@ -82,7 +83,7 @@ class UiFile(_generic.File):
     # COMMANDS #
 
     def compile(self, targetDirectory=None):
-        """compile the ui file
+        """compile the uiFile
 
         :param targetDirectory: directory of the compiled Ui - if not specified, command will use the UiFile directory
         :type targetDirectory: str or :class:`cgp_generic_utils.files.Directory`
@@ -91,12 +92,11 @@ class UiFile(_generic.File):
         :rtype: :class:`cgp_generic_utils.files.PyFile`
         """
 
-        # import qt lib here to avoid import issue in batch mode
+        # import qt lib - import here to avoid import issue in batch mode
         import pyside2uic
-        import cgp_generic_utils.qt
 
         # set target directory if not specified
-        targetDirectory = str(targetDirectory) or self.directory().path()
+        targetDirectory = targetDirectory or self.directory().path()
 
         # get compile file
         compiledFile = os.path.join(targetDirectory, self.baseName(withExtension=True).replace('.ui', '.py'))
@@ -110,19 +110,5 @@ class UiFile(_generic.File):
         srcFile.close()
         tgtFile.close()
 
-        # get file object
-        compiledFile = _python.PyFile(compiledFile)
-
-        # get compiled file content
-        content = compiledFile.read().replace('from PySide2 import QtCore, QtGui, QtWidgets',
-                                              'from PySide2 import QtCore, QtGui, QtWidgets\n'
-                                              'import cgp_generic_utils.qt')
-
-        for qType in cgp_generic_utils.qt.__all__:
-            content = content.replace('QtWidgets.Q{0}'.format(qType), 'cgp_generic_utils.qt.{0}'.format(qType))
-
-        # rewrite compiled file
-        compiledFile.write(content)
-
         # return
-        return compiledFile
+        return _python.PyFile(compiledFile)

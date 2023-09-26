@@ -5,18 +5,22 @@ performance decorator library
 # imports python
 import cProfile
 import pstats
-import StringIO
 import sys
 import time
 
+if sys.version_info < (3, 0):
+    import StringIO
+else:
+    from io import StringIO
+
 # imports local
-from . import _abstract
+from . import _generic
 
 
 # PERFORMANCE DECORATORS #
 
 
-class Timer(_abstract.Decorator):
+class Timer(_generic.Decorator):
     """decorator returning the execution time of the encapsulated script block / function
     """
 
@@ -38,18 +42,18 @@ class Timer(_abstract.Decorator):
         # execute
         self._initialTime = time.time()
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(self, *_, **__):
         """exit Timer decorator
         """
 
         # execute
         finalTime = time.time() - self._initialTime
 
-        # return
-        print '{0} : {1} seconds'.format(self._label or 'Timer', finalTime)
+        # print
+        sys.stdout.write('{0} : {1} seconds'.format(self._label or 'Timer', finalTime))
 
 
-class Profiler(_abstract.Decorator):
+class Profiler(_generic.Decorator):
     """decorator returning the profiling of the encapsulated script block / function
     """
 
@@ -72,7 +76,7 @@ class Profiler(_abstract.Decorator):
         self.profiler = cProfile.Profile()
         self.profiler.enable()
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(self, *_, **__):
         """exit Profiler decorator
         """
 

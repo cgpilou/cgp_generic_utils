@@ -5,10 +5,12 @@ python file object library
 # imports python
 import json
 import imp
-import cPickle
+import pickle
 
 # imports local
+import cgp_generic_utils.python
 from . import _generic
+from . import _api
 
 
 # PYTHON FILE OBJECTS #
@@ -25,21 +27,21 @@ class JsonFile(_generic.File):
     # OBJECT COMMANDS #
 
     @classmethod
-    def create(cls, path, content=None, **__):
+    def create(cls, path, content=None, **kwargs):
         """create a json file
 
-        :param path: path of the json file
+        :param path: path of the jsonFile
         :type path: str
 
-        :param content: content of the json file
-        :type content: any
+        :param content: content to set into the jsonFile
+        :type content: Any
 
-        :return: the created json file
+        :return: the created jsonFile
         :rtype: :class:`cgp_generic_utils.files.JsonFile`
         """
 
         # errors
-        if not _generic.Path(path).extension() == cls._extension:
+        if not _api.getExtension(path) == cls._extension:
             raise ValueError('{0} is not a JsonFile path'.format(path))
 
         # get content
@@ -55,9 +57,9 @@ class JsonFile(_generic.File):
     # COMMANDS #
 
     def read(self):
-        """read the json file
+        """read the jsonFile
 
-        :return: the content of the json file
+        :return: the content of the jsonFile
         :rtype: any
         """
 
@@ -80,21 +82,21 @@ class PklFile(_generic.File):
     # OBJECT COMMANDS #
 
     @classmethod
-    def create(cls, path, content=None, **__):
-        """create a pkl file
+    def create(cls, path, content=None, **kwargs):
+        """create a pklFile
 
-        :param path: path of the pkl file
+        :param path: path of the pklFile
         :type path: str
 
-        :param content: content of the pkl file
-        :type content: any
+        :param content: content to set into the pklFile
+        :type content: Any
 
-        :return: the created pkl file
+        :return: the created pklFile
         :rtype: :class:`cgp_generic_utils.files.PklFile`
         """
 
         # errors
-        if not _generic.Path(path).extension() == cls._extension:
+        if not _api.getExtension(path) == cls._extension:
             raise ValueError('{0} is not a PklFile path'.format(path))
 
         # get content
@@ -102,7 +104,7 @@ class PklFile(_generic.File):
 
         # execute
         with open(path, 'wb') as toWrite:
-            cPickle.dump(content, toWrite)
+            pickle.dump(content, toWrite, protocol=2)  # using protocol=2 to ensure compatibility py2/py3
 
         # return
         return cls(path)
@@ -110,15 +112,15 @@ class PklFile(_generic.File):
     # COMMANDS #
 
     def read(self):
-        """read the pkl file
+        """read the file
 
-        :return: the content of the pkl file
+        :return: the content of the pklFile
         :rtype: any
         """
 
         # get state form config file
         with open(self.path(), 'rb') as toRead:
-            data = cPickle.load(toRead)
+            data = pickle.load(toRead)
 
         # return
         return data
@@ -135,7 +137,7 @@ class PyFile(_generic.File):
     # COMMANDS #
 
     def importAsModule(self):
-        """import the python file as module
+        """import the pyFile as module
 
         :return: the module object
         :rtype: python

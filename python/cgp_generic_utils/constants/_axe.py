@@ -3,8 +3,7 @@ Constants used to manipulate Axis data
 """
 
 
-class Axis(object):
-
+class Axe(object):
     X = 'x'
     Y = 'y'
     Z = 'z'
@@ -12,5 +11,5 @@ class Axis(object):
 
 
 class AxisTable(object):
-
     ALL = {'xy': 'z', 'yz': 'x', 'xz': 'y'}
+

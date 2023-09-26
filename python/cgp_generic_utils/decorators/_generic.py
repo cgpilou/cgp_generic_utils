@@ -1,5 +1,5 @@
 """
-abstract decorator library
+generic decorator library
 """
 
 # imports python

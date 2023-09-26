@@ -9,13 +9,13 @@ import decimal
 def clamp(value, minimumValue, maximumValue):
     """clamp the value between the minimum and the maximum value
 
-    :param value: value to clamp
+    :param value: the value to clamp
     :type value: int or float
 
-    :param minimumValue: minimum value of the clamp
+    :param minimumValue: the minimum value of the clamp
     :type minimumValue: int or float
 
-    :param maximumValue: maximum value of the clamp
+    :param maximumValue: the maximum value of the clamp
     :type maximumValue: int or float
 
     :return: the clamped value
@@ -24,7 +24,7 @@ def clamp(value, minimumValue, maximumValue):
 
     # errors
     if not minimumValue < maximumValue:
-        raise RuntimeError('minvalue is not strictly inferior to maxvalue')
+        raise RuntimeError('minimumValue is not strictly inferior to maximumValue')
 
     # execute
     return max(minimumValue, min(maximumValue, value))
@@ -33,10 +33,10 @@ def clamp(value, minimumValue, maximumValue):
 def roundValue(value, decimalCount):
     """round the value to the count of decimals
 
-    :param value: value to round
+    :param value: the value to round
     :type value: float
 
-    :param decimalCount: count of decimal to round for
+    :param decimalCount: the count of decimal to round for
     :type decimalCount: int
 
     :return: the rounded value

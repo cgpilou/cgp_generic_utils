@@ -2,36 +2,35 @@
 library of functions for python module management
 """
 
-
 # imports python
 import sys
 
 
 def deleteModules(*args):
-    """ delete modules that contain the arguments
+    """delete modules that contain the arguments
     """
 
     # execute
-    for mod in sorted(sys.modules):
-        if any([True for t in args if t in mod]):
-            del sys.modules[mod]
+    for module in sorted(sys.modules):
+        if any([True for arg in args if arg in module]):
+            del sys.modules[module]
 
 
-def import_(module, command=None):
-    """import the module. return module.command if command is specified
+def importCommand(moduleName, commandName=None):
+    """import the module from a string - return ``module.command`` if command is specified
 
-    :param module: module of the command to import
-    :type module: str
+    :param moduleName: name of the module to import
+    :type moduleName: str
 
-    :param command: command to import
-    :type command: str
+    :param commandName: name of the command to import
+    :type commandName: str
 
-    :return: the imported function
-    :rtype: function
+    :return: the imported command
+    :rtype: python
     """
 
     # get module
-    mod = __import__(module, fromlist=[''])
+    module = __import__(moduleName, fromlist=[''])
 
     # return
-    return getattr(mod, command) if command else mod
+    return getattr(module, commandName) if commandName else module
