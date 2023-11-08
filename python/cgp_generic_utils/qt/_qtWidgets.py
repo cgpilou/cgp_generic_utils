@@ -22,7 +22,7 @@ class ComboBox(PySide2.QtWidgets.QComboBox):
     def goTo(self, text):
         """go to the item with the specified text
 
-        :param text: text used to select the proper item
+        :param text: the text of the item to go to
         :type text: str
         """
 
@@ -38,12 +38,12 @@ class LineEdit(PySide2.QtWidgets.QLineEdit):
     # COMMANDS #
 
     def setBackground(self, color=None, pattern='solid'):
-        """set the background color of the lineEdit using the specified color and pattern
+        """set the background color of the lineEdit
 
-        :param color: color to set - [R, V, B, A] - [0.8, 0.8, 0.8, 1] is default
+        :param color: the color to set - ``[R, V, B, A]`` - default is ``[0.8, 0.8, 0.8, 1]``
         :type color: list[int, float]
 
-        :param pattern: pattern of the background
+        :param pattern: the pattern of the background
         :type pattern: str
         """
 
@@ -56,8 +56,7 @@ class LineEdit(PySide2.QtWidgets.QLineEdit):
 
         # update color
         palette = PySide2.QtGui.QPalette(self.palette())
-        palette.setColor(PySide2.QtGui.QPalette.Base, 
-                         PySide2.QtGui.QColor.fromRgbF(*color))
+        palette.setColor(PySide2.QtGui.QPalette.Base, PySide2.QtGui.QColor.fromRgbF(*color))
 
         # update pattern
         brush = palette.brush(PySide2.QtGui.QPalette.Base)
@@ -71,9 +70,9 @@ class LineEdit(PySide2.QtWidgets.QLineEdit):
         self.setPalette(palette)
 
     def setForeground(self, color=None):
-        """set the foreground color of the lineEdit using the specified color and pattern
+        """set the foreground color of the lineEdit
 
-        :param color: color to set - [R, V, B, A] - [0.8, 0.8, 0.8, 1] is default
+        :param color: the color to set - ``[R, V, B, A]`` - default is ``[0.8, 0.8, 0.8, 1]``
         :type color: list[int, float]
         """
 
@@ -88,9 +87,9 @@ class LineEdit(PySide2.QtWidgets.QLineEdit):
         self.setPalette(palette)
 
     def setFrameColor(self, color=None):
-        """set the frame color of the lineEdit using the specified color
+        """set the frame color of the lineEdit
 
-        :param color: color to set - [R, V, B, A] - [0.8, 0.8, 0.8, 1] is default
+        :param color: the color to set - ``[R, V, B, A]`` - default is ``[0.8, 0.8, 0.8, 1]``
         :type color: list[int, float]
         """
 
@@ -115,7 +114,7 @@ class ListWidget(PySide2.QtWidgets.QListWidget):
     def addWidget(self, widget):
         """add widget to the QListWidget
 
-        :param widget: widget to add to the QListWidget
+        :param widget: the widget to add to the QListWidget
         :type widget: :class:`PySide2.QtWidgets.QWidget`
         """
 
@@ -128,13 +127,13 @@ class ListWidget(PySide2.QtWidgets.QListWidget):
         self.setItemWidget(listItem, widget)
 
         # update
-        listItem.childwidget = widget
+        listItem.childWidget = widget
         widget.parentItem = listItem
 
     def childrenItems(self):
         """get the children items of the list
 
-        :return: the list of children items
+        :return: the children items of the listWidget
         :rtype: list[:class:`PySide2.QtWidgets.QListWidgetItem`]
         """
 
@@ -149,6 +148,124 @@ class ListWidget(PySide2.QtWidgets.QListWidget):
         return data
 
 
+class Menu(PySide2.QtWidgets.QMenu):
+    """QMenu with custom functionalities
+    """
+
+    # COMMANDS #
+
+    def createAction(self, text, icon=None, triggeredCommand=None, shortcut=None):
+        """create an action and add it to the menu
+
+        :param text: the text of the action
+        :type text: str
+
+        :param icon: the icon of the action
+        :type icon: str
+
+        :param triggeredCommand: the command triggered by the action
+        :type triggeredCommand: python
+
+        :param shortcut: the shortcut keys combo associated to the action - written as text - ``[ex: 'Ctrl+C']``
+        :type shortcut: str
+
+        :return: the created action
+        :rtype: :class:`PySide2.QtWidgets.QAction`
+        """
+
+        # create QAction
+        action = PySide2.QtWidgets.QAction(self)
+
+        # set action text
+        action.setText(text)
+
+        # set the shortcut text
+        if shortcut:
+            action.setShortcut(shortcut)
+
+        # set icon
+        if icon:
+            action.setIcon(_qtGui.Icon(icon))
+
+        # connect trigger signal
+        if triggeredCommand:
+            action.triggered.connect(triggeredCommand)
+
+        # add action to menu
+        self.addAction(action)
+
+        # return
+        return action
+
+
+class ProgressBar(PySide2.QtWidgets.QWidget):
+    """QProgressBar with custom functionalities - encapsulated in QWidget to offer better text management
+    """
+
+    # INIT #
+
+    def __init__(self, barWidth=None, hasText=True, parent=None):
+        """ProgressBar class initialization
+
+        :param barWidth: the width of the progressBar
+        :type barWidth: int
+
+        :param hasText: ``True`` : the widget has a text widget - ``False`` : the widget doesn't have a text widget
+        :type hasText: bool
+
+        :param parent: the QWidget to parent the progressBar to
+        :type parent: :class:`PySide2.QtWidgets.QWidget`
+        """
+
+        # init
+        super(ProgressBar, self).__init__(parent=parent)
+
+        # main layout
+        self.mainLayout = PySide2.QtWidgets.QHBoxLayout(self)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.mainLayout)
+
+        # progress bar
+        self.progressBar = PySide2.QtWidgets.QProgressBar(self)
+
+        if barWidth:
+            self.progressBar.setFixedWidth(barWidth)
+
+        # text widget
+        self.textWidget = PySide2.QtWidgets.QLabel(self)
+        self.textWidget.setSizePolicy(PySide2.QtWidgets.QSizePolicy.Expanding,
+                                      PySide2.QtWidgets.QSizePolicy.Fixed)
+
+        # add widgets to layout
+        for widget in [self.progressBar, self.textWidget]:
+            self.mainLayout.addWidget(widget)
+
+        # set text widget status
+        self.textWidget.setHidden(not hasText)
+
+    # COMMANDS #
+
+    def setText(self, text):
+        """set the text of the progressBar
+
+        :param text: the text to set on the progressBar
+        :type text: str
+        """
+
+        # execute
+        self.textWidget.setText(text)
+
+    def setValue(self, value):
+        """set the value of the progressBar
+
+        :param value: the value to set on the progressBar
+        :type value: float
+        """
+
+        # execute
+        self.progressBar.setValue(value)
+
+
 class PushButton(PySide2.QtWidgets.QPushButton):
     """QPushButton with custom functionalities
     """
@@ -156,26 +273,26 @@ class PushButton(PySide2.QtWidgets.QPushButton):
     # COMMANDS #
 
     def setIcon(self, image):
-        """set the icon on the QPushButton
+        """set the icon on the pushButton
 
-        :param image: image to set on the QPushButton
+        :param image: image to set on the pushButton
         :type image: str
         """
 
-        # init
+        # execute
         super(PushButton, self).setIcon(_qtGui.Icon(image))
 
     def setIconSize(self, width, height):
-        """set the icon size
+        """set the size of the icon
 
-        :param width: width of the icon
+        :param width: the icon width
         :type width: int
 
-        :param height: height of the icon
+        :param height: the icon height
         :type height: int
         """
 
-        # init
+        # execute
         super(PushButton, self).setIconSize(PySide2.QtCore.QSize(width, height))
 
 
@@ -183,23 +300,39 @@ class TreeWidget(PySide2.QtWidgets.QTreeWidget):
     """QTreeWidget with custom functionalities
     """
 
+    # INIT #
+
+    def __init__(self, parent=None):
+        """TreeWidget class initialization
+
+        :param parent: the QWidget to parent the TreeWidget to
+        :type parent: :class:`PySide2.QtWidget.QWidget`
+        """
+
+        # init
+        super(TreeWidget, self).__init__(parent=parent)
+
+        # setup connections
+        self.__setupConnections()
+
     # COMMANDS #
 
     def childrenItems(self, recursive=False):
-        """get the children items parented to the TreeWidget
+        """get the children items parented to the treeWidget
 
-        :param recursive: defines whether or not the command will get the children items recursively through hierarchy
+        :param recursive: ``True`` : the command gets the children items recursively through hierarchy -
+                          ``False`` : the commands gets only the direct children items
         :type recursive: bool
 
-        :return: list of children items
-        :rtype: list[:class:`PySide2.QtWidgets.QTreeWidgetItem`, :class:`cgp_generic_utils.qt.TreeWidgetItem`]
+        :return: the children items
+        :rtype: list[:class:`PySide2.QtWidgets.QTreeWidgetItem`, :class:`TreeWidgetItem`]
         """
 
         # init
         children = []
 
         # get the list of topLevelItems
-        topLevelItems = [self.topLevelItem(iIndex) for iIndex in range(self.topLevelItemCount())]
+        topLevelItems = [self.topLevelItem(index) for index in range(self.topLevelItemCount())]
         children.extend(topLevelItems)
 
         # get the rest if specified
@@ -211,7 +344,7 @@ class TreeWidget(PySide2.QtWidgets.QTreeWidget):
         return children
 
     def clearSelection(self):
-        """clear the selection of the QTreeWidgetItem
+        """clear the selection of the treeWidget
         """
 
         # execute
@@ -219,7 +352,7 @@ class TreeWidget(PySide2.QtWidgets.QTreeWidget):
             item.setSelected(False)
 
     def resizeToContent(self, margin=0):
-        """resize the list of specified tre widgets to content
+        """resize the treeWidget to content
 
         :param margin: margin within the columns
         :type margin: int
@@ -240,6 +373,69 @@ class TreeWidget(PySide2.QtWidgets.QTreeWidget):
             # apply margin
             self.setColumnWidth(index, currentSize + margin)
 
+    def toggleExpand(self, item):
+        """toggle the expand state of the item.
+        If shift is pressed, children expand states are matched to the item expand state
+
+        :param item: the item to toggle the expand state to
+        :type: :class:`PySide2.QtWidgets.QTreeWidgetItem`
+        """
+
+        # get application modifiers
+        modifiers = PySide2.QtGui.QGuiApplication.keyboardModifiers()
+
+        # match children expand states if shift is pressed
+        if modifiers == PySide2.QtCore.Qt.ShiftModifier:
+            state = item.isExpanded()
+
+            for child in item.childrenItems(recursive=True):
+                child.setExpanded(state)
+
+    def setSelectedItems(self, items):
+        """set the selectedItems of the TreeWidget
+
+        :param items: items to set as selectedItems
+        :type items: list[:class:`PySide2.QtWidgets.QTreeWidgetItem`]
+        """
+
+        # init
+        toSelect = []
+        toUnselect = []
+
+        # parse current selection states
+        for child in self.childrenItems(recursive=True):
+
+            # ignore items with correct selection status
+            needSelection = child in items
+            if child.isSelected() == needSelection:
+                continue
+
+            # collect items to select
+            if needSelection:
+                toSelect.append(child)
+
+            # collect items to unselect
+            else:
+                toUnselect.append(child)
+
+        # select needed items
+        for item in toSelect:
+            item.setSelected(True)
+
+        # unselect needed items
+        for item in toUnselect:
+            item.setSelected(False)
+
+    # PRIVATE COMMANDS #
+
+    def __setupConnections(self):
+        """setup connections
+        """
+
+        # set connections
+        self.itemExpanded.connect(self.toggleExpand)
+        self.itemCollapsed.connect(self.toggleExpand)
+
 
 class TreeWidgetItem(PySide2.QtWidgets.QTreeWidgetItem):
     """QTreeWidgetItem with custom functionalities
@@ -248,9 +444,9 @@ class TreeWidgetItem(PySide2.QtWidgets.QTreeWidgetItem):
     # INIT #
 
     def __init__(self, parent=None):
-        """QTreeWidgetItem class initialization
+        """TreeWidgetItem class initialization
 
-        :param parent: QWidget under which the QTreeWidgetItem will be parented
+        :param parent: the QWidget under which the QTreeWidgetItem will be parented
         :type parent: :class:`PySide2.QtWidgets.QTreeWidget` or :class:`PySide2.QtWidgets.QTreeWidgetItem`
         """
 
@@ -258,30 +454,26 @@ class TreeWidgetItem(PySide2.QtWidgets.QTreeWidgetItem):
         super(TreeWidgetItem, self).__init__(parent)
 
         # parent if specified
-        if isinstance(parent, PySide2.QtWidgets.QTreeWidget) or isinstance(parent, TreeWidget):
+        if isinstance(parent, (PySide2.QtWidgets.QTreeWidget, TreeWidget)):
             parent.addTopLevelItem(self)
 
-        elif isinstance(parent, PySide2.QtWidgets.QTreeWidgetItem) or isinstance(parent, TreeWidgetItem):
+        elif isinstance(parent, (PySide2.QtWidgets.QTreeWidgetItem, TreeWidgetItem)):
             parent.addChild(self)
 
     # COMMANDS #
 
-    def addWidget(self, widget, index):
-        """add the specified widget to the specified column of the QTreeWidgetItem
+    def addWidget(self, widget, index=0):
+        """add the widget to the indexed column of the treeWidgetItem
 
-        :param widget: widget to add the the QTreeWidgetItem
+        :param widget: the widget to add to the treeWidgetItem
         :type widget: :class:`PySide2.QtWidgets.QWidget`
 
-        :param index: index of the column where to add the widget
+        :param index: the index of the column where to add the widget - default is first column
         :type index: int
         """
 
-        # get treeWidget
+        # init
         treeWidget = self.treeWidget()
-
-        # errors
-        if not treeWidget:
-            raise UserWarning('can\'t add a widget to a TreeWidgetItem not docked to a TreeWidget')
 
         # set widget parent
         widget.setParent(treeWidget)
@@ -290,13 +482,14 @@ class TreeWidgetItem(PySide2.QtWidgets.QTreeWidgetItem):
         treeWidget.setItemWidget(self, index, widget)
 
     def childrenItems(self, recursive=False):
-        """get the children items parented to the QTreeWidgetItem
+        """get the children items parented to the treeWidgetItem
 
-        :param recursive: defines whether or not the command will get the children items recursively through hierarchy
+        :param recursive: ``True`` : the command gets the children items recursively through hierarchy -
+                          ``False`` : the commands gets only the direct children items
         :type recursive: bool
 
-        :return: list of children
-        :rtype: list[:class:`PySide2.QtWidgets.QTreeWidgetItem`, :class:`cgp_generic_utils.qt.TreeWidgetItem`]
+        :return: the children items
+        :rtype: list[:class:`PySide2.QtWidgets.QTreeWidgetItem`, :class:`TreeWidgetItem`]
         """
 
         # init
@@ -319,20 +512,98 @@ class TreeWidgetItem(PySide2.QtWidgets.QTreeWidgetItem):
         # return
         return children
 
-    def setBackgrounds(self, indexes, color=None, pattern='solid'):
-        """set background colors of the columns of the specified indexes using the specified color and pattern
+    def index(self):
+        """get the index of the TreeWidgetItem
 
-        :param indexes: list of the column indexes use to set the backgrounds
+        :return: the index of the TreeWidgetItem
+        :rtype: int
+        """
+
+        # get parent and treeWidget
+        parent = self.parent()
+        treeWidget = self.treeWidget()
+
+        # return (if the item has no parent, it's a top level item)
+        return treeWidget.indexOfTopLevelItem(self) if parent is None else parent.indexOfChild(self)
+
+    def level(self):
+        """get the level of the TreeWidgetItem
+
+        :return: the level of the TreeWidgetItem
+        :rtype: int
+        """
+
+        # init
+        parent = self.parent()
+        level = 0
+
+        # execute
+        while parent:
+            level += 1
+            parent = parent.parent()
+
+        # return
+        return level
+
+    def nextItem(self):
+        """get the item following the TreeWidgetItem (at the same level of the TreeWidget)
+
+        :return: the tree item following the TreeWidgetItem
+        :rtype: :class:`PySide2.QtWidgets.QTreeWidgetItem`
+        """
+
+        # get parent, index and treeWidget
+        treeWidget = self.treeWidget()
+        index = self.index()
+        parent = self.parent()
+
+        # return
+        if parent:
+            return parent.child(index + 1) if index < parent.childCount() - 1 else None
+        return treeWidget.topLevelItem(index + 1) if index < treeWidget.topLevelItemCount() - 1 else None
+
+    def previousItem(self):
+        """get the item above the TreeWidgetItem (at the same level of the TreeWidget)
+
+        :return: get the item above the TreeWidgetItem
+        :rtype: :class:`PySide2.QtWidgets.QTreeWidgetItem`
+        """
+
+        # get parent, index and treeWidget
+        treeWidget = self.treeWidget()
+        index = self.index()
+        parent = self.parent()
+
+        # return
+        if parent:
+            return parent.child(index - 1) if index > 0 else None
+        return treeWidget.topLevelItem(index - 1) if index > 0 else None
+
+    def removeWidget(self, index=0):
+        """remove the widget of a column of the TreeWidgetItem
+
+        :param index: the index of the column to remove the widget from - default is first column
+        :param index: int
+        """
+
+        # execute
+        self.treeWidget().removeItemWidget(self, index)
+
+    def setBackgrounds(self, indexes=None, color=None, pattern='solid'):
+        """set the background of the index columns
+
+        :param indexes: the indexes used to set the backgrounds - default is all columns
         :type indexes: list[int]
 
-        :param color: color to set - [R, V, B, A] - [0.8, 0.8, 0.8, 1] is default
-        :type color: list[int, float]
+        :param color: the color to set - ``[R, V, B, A]`` - default is ``[0.8, 0.8, 0.8, 1]``
+        :type color: list[float]
 
-        :param pattern: pattern of the backgrounds
+        :param pattern: the pattern of the backgrounds
         :type pattern: str
         """
 
         # init
+        indexes = indexes or [index for index in range(self.columnCount())]
         color = color or [0.8, 0.8, 0.8, 1]
 
         # error
@@ -353,15 +624,15 @@ class TreeWidgetItem(PySide2.QtWidgets.QTreeWidgetItem):
             self.setBackground(index, brush)
 
     def setFonts(self, indexes, size=9, styles=None):
-        """set fonts of the columns of the specified indexes using the specified size and styles
+        """set the fonts of the index columns
 
-        :param indexes: list of the column indexes use to set the fonts
+        :param indexes: the column indexes used to set the fonts
         :type indexes: list[int]
 
-        :param size: size of the font
+        :param size: the size of the font
         :type size: int
 
-        :param styles: styles of the font - [bold - italic - underline]
+        :param styles: the styles of the font - ``[bold - italic - underline]``
         :type: list[:class:`cgp_generic_utils.constants.TypoStyle`]
         """
 
@@ -377,30 +648,16 @@ class TreeWidgetItem(PySide2.QtWidgets.QTreeWidgetItem):
         for index in indexes:
             self.setFont(index, font)
 
-    def setIcons(self, indexes, icon):
-        """set the icon of the specified column of the custom QTreeWidgetItem
-
-        :param indexes: index of the column to set the icon to
-        :type indexes: list
-
-        :param icon: name of the icon to set
-        :type icon: str
-        """
-
-        # execute
-        for index in indexes:
-            self.setIcon(index, _qtGui.Icon(icon))
-
     def setForegrounds(self, indexes, color=None, pattern='solid'):
-        """set foreground colors of the columns of the specified indexes using the specified color and pattern
+        """set the foreground colors of the index columns
 
-        :param indexes: list of the column indexes use to set the foregrounds
+        :param indexes: the column indexes used to set the foregrounds
         :type indexes: list[int]
 
-        :param color: color to set - [R, V, B, A] - [0.8, 0.8, 0.8, 1] is default
+        :param color: color to set - ``[R, V, B, A]`` - default is ``[0.8, 0.8, 0.8, 1]``
         :type color: list[int, float]
 
-        :param pattern: pattern of the foregrounds
+        :param pattern: the pattern of the foregrounds
         :type pattern: str
         """
 
@@ -424,10 +681,24 @@ class TreeWidgetItem(PySide2.QtWidgets.QTreeWidgetItem):
         for index in indexes:
             self.setForeground(index, brush)
 
-    def setSelectable(self, isSelectable):
-        """set the status flags of the item
+    def setIcons(self, indexes, icon):
+        """set the icon of the index columns
 
-        :param isSelectable: defines whether or not the item is selectable
+        :param indexes: the column indexes used to set the icons
+        :type indexes: list[int]
+
+        :param icon: the name of the icon to set
+        :type icon: str
+        """
+
+        # execute
+        for index in indexes:
+            self.setIcon(index, _qtGui.Icon(icon))
+
+    def setSelectable(self, isSelectable):
+        """set the selection status of the treeWidgetItem
+
+        :param isSelectable: ``True`` : the item is selectable - ``False`` : the item is not selectable
         :type isSelectable: bool
         """
 
@@ -445,12 +716,41 @@ class TreeWidgetItem(PySide2.QtWidgets.QTreeWidgetItem):
         self.setSelected(False)
 
     def setTexts(self, texts):
-        """set texts in the specified column using the specified texts
+        """set the texts of the index columns
 
-        :param texts: dictionary holding column indexes and texts to set - {0: 'text1', 2:'text2' ...}
-        :type texts: dict[int: str]
+        :param texts: the indexes and texts to set on the columns - ``{0: 'text1', 2:'text2' ...}``
+        :type : dict
         """
 
         # execute
         for index in texts:
             self.setText(index, texts[index])
+
+    def take(self):
+        """take the item out of the TreeWidget
+        """
+
+        # get the child index
+        index = self.index()
+
+        # get the parent
+        parent = self.parent()
+
+        # take the item
+        if parent is None:
+            self.treeWidget().takeTopLevelItem(index)
+        else:
+            parent.takeChild(index)
+
+    def widget(self, index=0):
+        """get the widget associated to a column of the TreeWidgetItem
+
+        :param index: the index of the column to get the widget from - default is first column
+        :param index: int
+
+        :return: the widget associated to a column of the TreeWidgetItem
+        :rtype: :class:`Pyside2.QtWidgets.QWidget`
+        """
+
+        # return
+        return self.treeWidget().itemWidget(self, index)

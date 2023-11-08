@@ -4,7 +4,6 @@ Constants used to manipulate file data
 
 
 class FileExtension(object):
-
     JSON = 'json'
     MA = 'ma'
     MB = 'mb'
@@ -16,14 +15,12 @@ class FileExtension(object):
 
 
 class FileFilter(object):
-
     FILE = 'file'
     DIRECTORY = 'directory'
     ALL = [FILE, DIRECTORY]
 
 
 class PathType(object):
-
     RELATIVE = 'relative'
     ABSOLUTE = 'absolute'
     ALL = [RELATIVE, ABSOLUTE]

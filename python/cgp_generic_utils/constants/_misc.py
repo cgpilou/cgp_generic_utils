@@ -8,13 +8,17 @@ import os
 
 class Environment(object):
 
-    GENERIC_UTILS_ROOT = os.sep.join(os.path.dirname(__file__).split(os.sep)[:-3])
-    ICON_LIBRARY = os.path.join(GENERIC_UTILS_ROOT, 'icons')
-    SCRIPT_EDITOR = 'C:\\Program Files (x86)\\Notepad++\\notepad++.exe'
+    # text editor executable
+    TEXT_EDITOR_EXECUTABLE = NotImplemented
+
+    # config directory
+    CONFIG_DIRECTORY = os.path.join(os.path.expanduser("~"), '.cgpConfigs')
+
+    # icon directory
+    ICON_LIBRARY = os.path.join(os.sep.join(os.path.dirname(__file__).split(os.sep)[:-3]), 'icons')
 
 
 class LogType(object):
-
     PRINT = 'print'
     INFO = 'info'
     WARNING = 'warning'
@@ -23,14 +27,20 @@ class LogType(object):
 
 
 class Orientation(object):
-
     HORIZONTAL = 'horizontal'
     VERTICAL = 'vertical'
     ALL = [HORIZONTAL, VERTICAL]
 
 
-class TransformMode(object):
+class StatusColor(object):
+    ERROR = (0.91, 0.42, 0.42)      # red
+    INFO = (0.2, 0.6, 0.8)          # blue
+    VALID = (0.23, 0.87, 0.57)      # green
+    WARNING = (0.93, 0.78, 0.17)    # yellow
+    ALL = [ERROR, INFO, VALID, WARNING]
 
+
+class TransformMode(object):
     RELATIVE = 'relative'
     ABSOLUTE = 'absolute'
     ALL = [RELATIVE, ABSOLUTE]

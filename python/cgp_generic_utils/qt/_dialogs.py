@@ -15,6 +15,7 @@ import PySide2.QtCore
 import cgp_generic_utils.python
 import cgp_generic_utils.constants
 from . import _qtGui
+from . import _qtWidgets
 
 
 # BASE OBJECTS #
@@ -32,21 +33,21 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
         :param title: the title of the dialog
         :type title: str
 
-        :param label: the content of the label to set
+        :param label: the label of the dialog
         :type label: str
 
-        :param size: values of the width and the height  ``[width - height]`` - default is ``[None, None]``
+        :param size: the size of the dialog - ``[width, height]`` - default is ``[None, None]``
         :type size: list[int]
 
-        :param parent: QWidget to parent the TextEdit dialog to
+        :param parent: the QWidget to parent the dialog to
         :type parent: :class:`PySide2.QtWidgets.QWidget`
 
-        :param isFrameless: ``True`` : dialog is frameless - ``False`` : dialog has a frame
+        :param isFrameless: ``True`` : the dialog is frameless - ``False`` : the dialog has a frame
         :type isFrameless: bool
 
-        :param orientation: orientation of the content layout -
+        :param orientation: the orientation of the content layout - 
                             default is ``cgp_generic_utils.constants.Orientation.VERTICAL``
-        :type orientation: str
+        :type orientation: :class:`cgp_generic_utils.constants.Orientation`
         """
 
         # init
@@ -80,9 +81,9 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
 
         # label
         self.__label = PySide2.QtWidgets.QLabel(self)
-        sizePolicy = PySide2.QtWidgets.QSizePolicy(PySide2.QtWidgets.QSizePolicy.Preferred,
+        sizepolicy = PySide2.QtWidgets.QSizePolicy(PySide2.QtWidgets.QSizePolicy.Preferred,
                                                    PySide2.QtWidgets.QSizePolicy.Fixed)
-        self.__label.setSizePolicy(sizePolicy)
+        self.__label.setSizePolicy(sizepolicy)
         self.__label.setMinimumSize(PySide2.QtCore.QSize(0, 25))
         self.__label.setAlignment(PySide2.QtCore.Qt.AlignCenter)
         self.__verticalLayout.addWidget(self.__label)
@@ -90,9 +91,9 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
 
         # content layout
         if orientation == cgp_generic_utils.constants.Orientation.VERTICAL:
-            self.__contentLayout = PySide2.QtWidgets.QVBoxLayout(self)
+            self.__contentLayout = PySide2.QtWidgets.QVBoxLayout()
         else:
-            self.__contentLayout = PySide2.QtWidgets.QHBoxLayout(self)
+            self.__contentLayout = PySide2.QtWidgets.QHBoxLayout()
 
         self.__verticalLayout.addLayout(self.__contentLayout)
 
@@ -103,32 +104,32 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
         self.__verticalLayout.addItem(spacerItem_01)
 
         # horizontal layout
-        self.__horizontalLayout = PySide2.QtWidgets.QHBoxLayout()
-        self.__verticalLayout.addLayout(self.__horizontalLayout)
+        self.__buttonLayout = PySide2.QtWidgets.QHBoxLayout()
+        self.__verticalLayout.addLayout(self.__buttonLayout)
 
         # spacer 02
         spacerItem_02 = PySide2.QtWidgets.QSpacerItem(40, 20,
                                                       PySide2.QtWidgets.QSizePolicy.Expanding,
                                                       PySide2.QtWidgets.QSizePolicy.Minimum)
-        self.__horizontalLayout.addItem(spacerItem_02)
+        self.__buttonLayout.addItem(spacerItem_02)
 
         # ok button
         self.__ok_b = PySide2.QtWidgets.QPushButton(self)
         self.__ok_b.setMinimumSize(PySide2.QtCore.QSize(0, 30))
-        self.__horizontalLayout.addWidget(self.__ok_b)
+        self.__buttonLayout.addWidget(self.__ok_b)
         self.setOkButton()
 
         # cancel button
         self.__cancel_b = PySide2.QtWidgets.QPushButton(self)
         self.__cancel_b.setMinimumSize(PySide2.QtCore.QSize(0, 30))
-        self.__horizontalLayout.addWidget(self.__cancel_b)
+        self.__buttonLayout.addWidget(self.__cancel_b)
         self.setCancelButton()
 
         # spacer 03
         spacerItem_03 = PySide2.QtWidgets.QSpacerItem(40, 20,
                                                       PySide2.QtWidgets.QSizePolicy.Expanding,
                                                       PySide2.QtWidgets.QSizePolicy.Minimum)
-        self.__horizontalLayout.addItem(spacerItem_03)
+        self.__buttonLayout.addItem(spacerItem_03)
 
         # set in space
         if not parent:
@@ -148,11 +149,31 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
 
     # COMMANDS #
 
+    def label(self):
+        """get the label of the dialog
+
+        :return: the label of the dialog
+        :rtype: :class:`PySide2.QtWidgets.QLabel`
+        """
+
+        # return
+        return self.__label
+
+    def buttonLayout(self):
+        """get the button layout
+
+        :return: the button layout
+        :rtype: :class:`PySide2.QtWidget.QBoxLayout`
+        """
+
+        # return
+        return self.__buttonLayout
+
     def contentLayout(self):
-        """the content layout
+        """get the content layout
 
         :return: the content layout
-        :rtype: :class:`PySide2.QtWidgets.QBoxLayout`
+        :rtype: :class:`PySide2.QtWidget.QBoxLayout`
         """
 
         # return
@@ -161,7 +182,7 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
     def isValid(self):
         """check if the dialog is valid
 
-        :return: ``True`` it is valid - ``False`` it is not valid
+        :return: ``True`` : it is valid - ``False`` : it is not valid
         :rtype: bool
         """
 
@@ -177,33 +198,37 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
             self.reject()
 
         # enter
-        elif event.key() in [PySide2.QtCore.Qt.Key_Return, PySide2.QtCore.Qt.Key_Enter] and self.isValid:
+        elif event.key() in [PySide2.QtCore.Qt.Key_Return, PySide2.QtCore.Qt.Key_Enter] and self.isValid():
             self.accept()
 
     def load(self):
-        """load base dialog
+        """load the dialog
 
         :return: ``cancel`` : self.rejection - ``ok`` : self.validation
         :rtype: any
         """
 
         # return
-        return self.validation() if self.exec_() else self.rejection()
+        return self._validation() if self.exec_() else self._rejection()
 
-    def rejection(self):
-        """result of the dialog when ``cancel`` is pressed
+    def setButtonDisplayed(self, isOkDisplayed=True, isCancelDisplayed=True):
+        """set the display status of the buttons
 
-        :return: the rejection of the dialog
-        :rtype: any
+        :param isOkDisplayed: ``True`` : ok button is displayed - ``False`` : ok button is hidden
+        :type isOkDisplayed: bool
+
+        :param isCancelDisplayed: ``True`` : cancel button is displayed - ``False`` : cancel button is hidden
+        :type isCancelDisplayed: bool
         """
 
         # execute
-        return None
+        self.__ok_b.setHidden(not isOkDisplayed)
+        self.__cancel_b.setHidden(not isCancelDisplayed)
 
     def setCancelButton(self, text=None):
         """set the text of the cancel button
 
-        :param text: text to set on the cancel button
+        :param text: the text to set on the cancel button
         :type text: str
         """
 
@@ -214,9 +239,9 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
         self.__cancel_b.setText(text)
 
     def setOkButton(self, text=None):
-        """set the text ok the ok button
+        """set the test of the okButton
 
-        :param text: text to set on the ok button
+        :param text: the text to set on the ok button
         :type text: str
         """
 
@@ -227,9 +252,9 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
         self.__ok_b.setText(text)
 
     def setStatus(self, okEnabled=True):
-        """set the status of the ok button
+        """set the status of the okButton
 
-        :param okEnabled: ``True`` : the ok button is enabled - ``False`` the ok button is disabled
+        :param okEnabled: ``True`` : the okButton is enabled - ``False`` : the okButton is disabled
         :type okEnabled: bool
         """
 
@@ -240,7 +265,7 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
     def setSize(self, size):
         """set the size of the dialog
 
-        :param size: values of the width and the height  ``[width - height]``
+        :param size: the size of the dialog - ``[width, height]``
         :type size: list[int]
         """
 
@@ -261,8 +286,20 @@ class BaseDialog(PySide2.QtWidgets.QDialog):
         else:
             self.setGeometry(geometry.x(), geometry.y(), size[0], size[0])
 
-    def validation(self):
-        """result of the dialog when ``ok`` is pressed
+    # PRIVATE COMMANDS #
+
+    def _rejection(self):
+        """get the result of the dialog when ``cancel`` is pressed
+
+        :return: the rejection of the dialog
+        :rtype: any
+        """
+
+        # execute
+        return None
+
+    def _validation(self):
+        """get the result of the dialog when ``ok`` is pressed
 
         :return: the validation of the dialog
         :rtype: any
@@ -281,37 +318,38 @@ class CheckBoxDialog(BaseDialog):
 
     # INIT #
 
-    def __init__(self, title, label, data, size=None, parent=None, isFrameless=False):
+    def __init__(self, title, label, data, size=None, parent=None, isFrameless=False, orientation=None):
         """CheckBoxDialog class initialization
 
         :param title: the title of the dialog
         :type title: str
 
-        :param label: the content of the label to set
+        :param label: the label of the dialog
         :type label: str
 
-        :param data: data used to labels and states to populate the checkBoxes - ``{label1: True, label2: False}``
+        :param data: the data used to build the checkBoxes - ``{label1: True, label2: False}``
         :type data: dict
 
-        :param size: values of the width and the height  ``[width - height]`` - default is ``[None, None]``
+        :param size: the size of the dialog - ``[width, height]`` - default is ``[None, None]``
         :type size: list[int]
 
-        :param parent: QWidget to parent the line edit dialog to
+        :param parent: the QWidget to parent the dialog to
         :type parent: :class:`PySide2.QtWidgets.QWidget`
 
-        :param isFrameless: ``True`` : dialog is frameless - ``False`` : dialog has a frame
+        :param isFrameless: ``True`` : the dialog is frameless - ``False`` : the dialog has a frame
         :type isFrameless: bool
         """
 
         # init
         size = size or [None, None]
+        orientation = orientation or cgp_generic_utils.constants.Orientation.HORIZONTAL
 
         super(CheckBoxDialog, self).__init__(title,
                                              label,
                                              size=size,
                                              parent=parent,
                                              isFrameless=isFrameless,
-                                             orientation=cgp_generic_utils.constants.Orientation.HORIZONTAL)
+                                             orientation=orientation)
 
         self.__data = data
         self.__checkboxes = []
@@ -335,34 +373,41 @@ class CheckBoxDialog(BaseDialog):
     # COMMANDS #
 
     def addCheckbox(self, label, isChecked):
-        """add a new check box to the dialog
+        """add a new checkBox to the dialog
 
-        :param label: label of the checkbox
+        :param label: the label of the checkbox
         :type label: str
 
-        :param isChecked: ``True`` checkbox is checked - ``False`` checkbox is not checked
+        :param isChecked: ``True`` : the checkbox is checked - ``False`` : the checkbox is not checked
         :type isChecked: bool
 
-        :return: the added checkbox
+        :return: the created checkbox
         :rtype: :class:`PySide2.QtWidgets.QCheckBox`
         """
+
+        # init
+        contentLayout = self.contentLayout()
 
         # execute
         checkbox = PySide2.QtWidgets.QCheckBox(self)
         checkbox.setText(label)
         checkbox.setChecked(isChecked)
-        self.contentLayout().addWidget(checkbox)
+        contentLayout.addWidget(checkbox)
+
+        # center the checkbox if it is in a vertical layout
+        if isinstance(contentLayout, PySide2.QtWidgets.QVBoxLayout):
+            checkbox.setStyleSheet('QCheckBox{padding-left:50%; padding-right:50%;}')
 
         # update
         self.__checkboxes.append(checkbox)
 
     # PRIVATE COMMANDS #
 
-    def validation(self):
-        """validation of the dialog
+    def _validation(self):
+        """get the result of the dialog when ``ok`` is pressed
 
         :return: ``Cancel`` : None - ``Ok`` : {checkBoxLabel1: isChecked1, checkBoxLabel2: isChecked2 ...}
-        :rtype: None or dict
+        :rtype: dict or None
         """
 
         # init
@@ -389,22 +434,22 @@ class ComboBoxDialog(BaseDialog):
         :param title: the title of the dialog
         :type title: str
 
-        :param label: the content of the label to set
+        :param label: the label of the dialog
         :type label: str
 
-        :param data: data used to build the comboBoxes - ``[[label1, [itemA, itemB ...]], [label2, [...]], ...]``
+        :param data: the data used to build the comboBoxes - ``[[label1, [itemA, itemB ...]], [label2, [...]], ...]``
         :type data: list[list[str, list[str]]]
 
-        :param entryLabelWidth: with of the label of the combobox entries
+        :param entryLabelWidth: the with of the label of the combobox entries
         :type entryLabelWidth: int
 
-        :param size: values of the width and the height  ``[width - height]`` - default is ``[None, None]``
+        :param size: the size of the dialog - ``[width, height]`` - default is ``[None, None]``
         :type size: list[int]
 
-        :param parent: QWidget to parent the line edit dialog to
+        :param parent: the QWidget to parent the lineEdit dialog to
         :type parent: :class:`PySide2.QtWidgets.QWidget`
 
-        :param isFrameless: ``True`` : dialog is frameless - ``False`` : dialog has a frame
+        :param isFrameless: ``True`` : the dialog is frameless - ``False`` : the dialog has a frame
         :type isFrameless: bool
 
         :param orientation: defines the orientation of the content layout -
@@ -461,13 +506,23 @@ class ComboBoxDialog(BaseDialog):
         # update
         self.__comboboxes.append(entryCombobox)
 
+    def comboBoxes(self):
+        """get the combo boxes of the ComboBoxDialog
+
+        :return: the combo boxes
+        :rtype: :class:`PySide2.QtWidgets.QCombobox`
+        """
+
+        # return
+        return self.__comboboxes
+
     # PRIVATE COMMANDS #
 
-    def validation(self):
-        """validation of the dialog
+    def _validation(self):
+        """result of the dialog when ``ok`` is pressed
 
-        :return: ``Cancel`` : None - ``Ok`` : list of combobox currentTexts
-        :rtype: None or list[str]
+        :return: Cancel : None - Ok : list of combobox currentTexts
+        :rtype: list[str] or None
         """
 
         # return
@@ -480,44 +535,60 @@ class ComboBoxLineEditDialog(BaseDialog):
 
     # INIT #
 
-    def __init__(self, title, label, items, icons=None, iconSize=None, text=None, comboSeparator=None,
-                 separator=None, concatenateResult=True, size=None, parent=None, isFrameless=False):
+    def __init__(self, 
+                 title, 
+                 label, 
+                 items, 
+                 defaultItem=None, 
+                 icons=None, 
+                 iconSize=None, 
+                 text=None, 
+                 comboSeparator=None,
+                 separator=None, 
+                 concatenateResult=True, 
+                 size=None, 
+                 parent=None, 
+                 isFrameless=False):
         """ComboBoxLineEditDialog class initialization
 
         :param title: the title of the dialog
         :type title: str
 
-        :param label: the content of the label to set
+        :param label: the label of the dialog
         :type label: str
 
-        :param icons: icons used to populate the combobox
+        :param icons: the icons used to populate the combobox
         :type icons: list[str]
 
-        :param iconSize: size of the icons - default is ``[10, 10]``
+        :param iconSize: the size of the icons - default is ``[10, 10]``
         :type iconSize: list[int]
 
-        :param items: item used to populate the combobox
+        :param items: the item used to populate the combobox
         :type items: list[str]
+
+        :param defaultItem: the selected default item at the opening of the dialog
+        :type defaultItem: str
 
         :param text: the text that will be displayed in the lineEdit at initialization
         :type text: str
 
-        :param comboSeparator: separator used to split combobox content if specified
+        :param comboSeparator: the separator used to split comboBox content if specified
         :type comboSeparator: str
 
-        :param separator: separator used when merging current combobox item with lineEdit text
+        :param separator: the separator used when merging current comboBox item with lineEdit text
         :type separator: str
 
-        :param concatenateResult: defines whether or not the result will be concatenated between combobox and lineEdit
+        :param concatenateResult: ``True`` : result will be concatenated between comboBox and lineEdit - 
+                                  ``False`` : result will not be concatenated between comboBox and lineEdit
         :type concatenateResult: bool
 
-        :param size: values of the width and the height  ``[width - height]`` - default is ``[None, None]``
+        :param size: the size of the dialog - ``[width, height]`` - default is ``[None, None]``
         :type size: list[int]
 
-        :param parent: QWidget to parent the line edit dialog to
+        :param parent: the QWidget to parent the dialog to
         :type parent: :class:`PySide2.QtWidgets.QWidget`
 
-        :param isFrameless: ``True`` : dialog is frameless - ``False`` : dialog has a frame
+        :param isFrameless: ``True`` : the dialog is frameless - ``False`` : the dialog has a frame
         :type isFrameless: bool
         """
 
@@ -530,7 +601,7 @@ class ComboBoxLineEditDialog(BaseDialog):
                                                      size=size,
                                                      parent=parent,
                                                      isFrameless=isFrameless,
-                                                     orientation=cgp_generic_utils.constants.Orientation.HORIZONTAL)
+                                                     orientation=cgp_generic_utils.constants.Orientation.VERTICAL)
 
         self.__items = items
         self.__icons = icons
@@ -543,18 +614,25 @@ class ComboBoxLineEditDialog(BaseDialog):
         # define comboSeparator
         self.__comboSeparator = comboSeparator or None
 
+        # layout
+        self.__layout = PySide2.QtWidgets.QHBoxLayout(self)
+        self.contentLayout().addLayout(self.__layout)
+
         # combobox
-        self.__combobox = PySide2.QtWidgets.QComboBox(self)
+        self.__combobox = cgp_generic_utils.qt.ComboBox(self)
         self.setItems(items=self.__items)
-        self.contentLayout().addWidget(self.__combobox)
+        self.__layout.addWidget(self.__combobox)
 
         if self.__icons:
             self.setIcons(self.__icons)
 
+        if defaultItem and defaultItem in items:
+            self.__combobox.goTo(defaultItem)
+
         # line Edit
         self.__lineEdit = PySide2.QtWidgets.QLineEdit(self)
         self.setText(text=text)
-        self.contentLayout().addWidget(self.__lineEdit)
+        self.__layout.addWidget(self.__lineEdit)
 
         # set ok button status
         self._setOkStatus()
@@ -571,16 +649,26 @@ class ComboBoxLineEditDialog(BaseDialog):
 
     # COMMANDS #
 
-    def setIcons(self, icons):
-        """set the items icons of the combobox
+    def lineEdit(self):
+        """get the lineEdit of the dialog
 
-        :param icons: icons used to set the combobox
+        :return: the lineEdit of the dialog
+        :rtype: :class:`PySide2.QtWidgets.QLineEdit`
+        """
+
+        # return
+        return self.__lineEdit
+
+    def setIcons(self, icons):
+        """set the items icons of the comboBox
+
+        :param icons: the icons used to set the comboBox
         :type icons: list[str]
         """
 
         # errors
         if not len(self.__items) == len(self.__icons):
-            raise RuntimeError('The number of icons does not match the number of items')
+            raise RuntimeError('The number of icons doesn\'t match the number of items')
 
         # set icons
         for index, icon in enumerate(icons):
@@ -591,9 +679,9 @@ class ComboBoxLineEditDialog(BaseDialog):
         self.__combobox.setIconSize(PySide2.QtCore.QSize(*self.__iconSize))
 
     def setItems(self, items=None):
-        """set the items of the combobox
+        """set the items of the comboBox
 
-        :param items: items used to set the combobox
+        :param items: the items used to set the comboBox
         :type items: list[str]
         """
 
@@ -609,15 +697,14 @@ class ComboBoxLineEditDialog(BaseDialog):
         self.__items = items
 
     def setText(self, text=None):
-        """set the text of the line edit
+        """set the text of the lineEdit
 
-        :param text: text used to set the line edit
+        :param text: the text used to set the lineEdit
         :type text: str
         """
 
-        # execute
-        if text:
-            self.__lineEdit.setText(text)
+        # set text
+        self.__lineEdit.setText(text or '')
 
     # PRIVATE COMMANDS #
 
@@ -631,13 +718,13 @@ class ComboBoxLineEditDialog(BaseDialog):
         # execute
         self.setStatus(okEnabled=bool(text))
 
-    def validation(self):
-        """validation of the dialog
+    def _validation(self):
+        """get the result of the dialog when ``ok`` is pressed
 
         :return: ``Cancel`` : None -
                  ``Ok`` : if comboSeparator ``[{combobox.split(comboSeparator)[0]}{separator}{lineEdit} ...]``
                           else ``{combobox}{separator}{lineEdit}``
-        :rtype: None or list[str] or str
+        :rtype: None or str or list[str]
         """
 
         # get content
@@ -666,30 +753,36 @@ class LineEditDialog(BaseDialog):
 
     # INIT #
 
-    def __init__(self, title, label, data=None, entryLabelWidth=35,
-                 size=None, parent=None, isFrameless=False):
+    def __init__(self, 
+                 title, 
+                 label,
+                 data=None, 
+                 entryLabelWidth=35,
+                 size=None,
+                 parent=None, 
+                 isFrameless=False):
         """LineEditDialog class initialization
 
         :param title: the title of the dialog
         :type title: str
 
-        :param label: the content of the label to set
+        :param label: the label of the dialog
         :type label: str
 
-        :param data: data used to create the entry lineEdits - ``[[label1, text1], ...]`` -
+        :param data: the data used to create the lineEdits - ``[[label1, text1], ...]`` -
                      default is ``[[None, None]]``
         :type data: list[list[str]]
 
-        :param entryLabelWidth: with of the label of the lineEdit entries
+        :param entryLabelWidth: the with of the label of the lineEdit entries
         :type entryLabelWidth: int
 
-        :param size: values of the width and the height ``[width - height]`` - default is ``[None, None]``
+        :param size: the size of the dialog - ``[width, height]`` - default is ``[None, None]``
         :type size: list[int]
 
-        :param parent: QWidget to parent the line edit dialog to
+        :param parent: the QWidget to parent the dialog to
         :type parent: :class:`PySide2.QtWidgets.QWidget`
 
-        :param isFrameless: ``True`` : dialog is frameless - ``False`` : dialog has a frame
+        :param isFrameless: ``True`` : the dialog is frameless - ``False`` : the dialog has a frame
         :type isFrameless: bool
         """
 
@@ -770,8 +863,8 @@ class LineEditDialog(BaseDialog):
         # execute
         self.setStatus(okEnabled=status)
 
-    def validation(self):
-        """validation of the dialog
+    def _validation(self):
+        """get the result of the dialog when ``ok`` is pressed
 
         :return: ``Cancel`` : None - ``Ok`` : lineEdit contents
         :rtype: None or list[str]
@@ -779,6 +872,107 @@ class LineEditDialog(BaseDialog):
 
         # execute
         return [str(lineEdit.text()) for lineEdit in self.__lineEdits]
+
+
+class ProgressBarDialog(BaseDialog):
+    """dialog displaying a progressBar
+    """
+
+    # INIT #
+
+    def __init__(self, title, label, size=None, parent=None, isFrameless=False, barWidth=None, hasBarText=True):
+        """ProgressBarDialog class initialization
+
+        :param title: the title of the dialog
+        :type title: str
+
+        :param label: the label of the dialog
+        :type label: str
+
+        :param size: the size of the dialog - ``[width, height]`` - default is ``[None, None]``
+        :type size: list[int]
+
+        :param parent: the QWidget to parent the TextEdit dialog to
+        :type parent: :class:`PySide2.QtWidgets.QWidget`
+
+        :param isFrameless: ``True`` : the dialog is frameless - ``False`` : the dialog has a frame
+        :type isFrameless: bool
+
+        :param barWidth: the width of the bar
+        :type barWidth: int
+
+        :param hasBarText: ``True`` : the progressBar has a text - ``False`` : the progressBar doesn't have a text
+        :type hasBarText: bool
+        """
+
+        # init
+        super(ProgressBarDialog, self).__init__(title, label, size=size, parent=parent, isFrameless=isFrameless)
+
+        # hide buttons
+        self.setButtonDisplayed(isOkDisplayed=False, isCancelDisplayed=False)
+
+        # set focus policy
+        self.setFocusPolicy(PySide2.QtCore.Qt.NoFocus)
+
+        # progress layout
+        self._progressLayout = PySide2.QtWidgets.QHBoxLayout()
+        self.contentLayout().addLayout(self._progressLayout)
+
+        # spacer to center progress bar
+        self._progressLayout.addItem(PySide2.QtWidgets.QSpacerItem(1, 1,
+                                                                   PySide2.QtWidgets.QSizePolicy.Expanding,
+                                                                   PySide2.QtWidgets.QSizePolicy.Expanding))
+
+        # progress bar
+        self.progressBar = _qtWidgets.ProgressBar(barWidth=barWidth, hasText=hasBarText, parent=self)
+        self._progressLayout.addWidget(self.progressBar)
+
+        # spacer to center progress bar
+        self._progressLayout.addItem(PySide2.QtWidgets.QSpacerItem(1, 1,
+                                                                   PySide2.QtWidgets.QSizePolicy.Expanding,
+                                                                   PySide2.QtWidgets.QSizePolicy.Expanding))
+
+    # COMMANDS #
+
+    def load(self):
+        """load the progressBar dialog
+        """
+
+        # return
+        self.show()
+
+        # refresh
+        self.adjustSize()
+        time.sleep(0.1)
+        PySide2.QtWidgets.QApplication.processEvents()
+
+    def setText(self, text):
+        """set the text of the progressBar
+
+        :param text: the text to set on the progressBar
+        :type text: str
+        """
+
+        # execute
+        self.progressBar.setText(text)
+
+        # refresh
+        self.adjustSize()
+        PySide2.QtWidgets.QApplication.processEvents()
+
+    def setValue(self, value):
+        """set the value of the progressBar
+
+        :param value: value to set on the progressBar
+        :type value: float
+        """
+
+        # execute
+        self.progressBar.setValue(value)
+
+        # refresh
+        self.adjustSize()
+        PySide2.QtWidgets.QApplication.processEvents()
 
 
 class StatusDialog(BaseDialog):
@@ -797,13 +991,13 @@ class StatusDialog(BaseDialog):
         :param title: the title of the dialog
         :type title: str
 
-        :param size: values of the width and the height ``[width - height]`` - default is ``[None, None]``
+        :param size: the size of the dialog - ``[width, height]`` - default is ``[None, None]``
         :type size: list[int]
 
-        :param parent: QWidget to parent the line edit dialog to
+        :param parent: the QWidget to parent the TextEdit dialog to
         :type parent: :class:`PySide2.QtWidgets.QWidget`
 
-        :param isFrameless: ``True`` : dialog is frameless - ``False`` : dialog has a frame
+        :param isFrameless: ``True`` : the dialog is frameless - ``False`` : the dialog has a frame
         :type isFrameless: bool
         """
 
@@ -815,8 +1009,8 @@ class StatusDialog(BaseDialog):
                                            isFrameless=isFrameless,
                                            orientation=cgp_generic_utils.constants.Orientation.HORIZONTAL)
 
-        # hide buttons and label
-        self.setButtonDisplayed(False)
+        # hide buttons
+        self.setButtonDisplayed(isOkDisplayed=False, isCancelDisplayed=False)
 
         # set focus policy
         self.setFocusPolicy(PySide2.QtCore.Qt.NoFocus)
@@ -833,7 +1027,7 @@ class StatusDialog(BaseDialog):
         self._setupConnections()
 
     def _setupConnections(self):
-        """setup connections
+        """setup the connections of the widgets
         """
 
         # execute
@@ -842,12 +1036,12 @@ class StatusDialog(BaseDialog):
     # COMMANDS #
 
     def close(self, description, closeTime=1):
-        """close status dialog
+        """close the statusDialog
 
-        :param description: description to set before the dialog closes
+        :param description: the description to set before the dialog closes
         :type description: str
 
-        :param closeTime: time in seconds before the dialog closes
+        :param closeTime: the time in seconds before the dialog closes
         :type closeTime: float
         """
 
@@ -866,13 +1060,13 @@ class StatusDialog(BaseDialog):
         """override keyPressEvent
         """
 
-        # execute
+        # this event is overwriten to avoid escape key to close the dialog 
         pass
 
     def load(self, description):
-        """load status dialog
+        """load the statusDialog
 
-        :param description: description to set when the dialog is loaded
+        :param description: the description to set when the dialog is loaded
         :type description: str
         """
 
@@ -883,6 +1077,7 @@ class StatusDialog(BaseDialog):
         self.statusChanged.emit(description)
 
         # refresh
+        self.adjustSize()
         time.sleep(0.1)
         PySide2.QtWidgets.QApplication.processEvents()
 
@@ -892,7 +1087,7 @@ class StatusDialog(BaseDialog):
     def _setDescription(self, description):
         """set description of the dialog
 
-        :param description: set the description of the dialog
+        :param description: the the description to set on the dialog
         :type description: str
         """
 
@@ -912,19 +1107,19 @@ class TextEditDialog(BaseDialog):
         :param title: the title of the dialog
         :type title: str
 
-        :param label: the content of the label to set
+        :param label: the label of the dialog
         :type label: str
 
         :param text: the text that will be displayed in the TextEdit at initialization
         :type text: str
 
-        :param size: values of the width and the height ``[width - height]`` - default is ``[None, None]``
+        :param size: the size of the dialog - ``[width, height]`` - default is ``[None, None]``
         :type size: list[int]
 
-        :param parent: QWidget to parent the TextEdit dialog to
+        :param parent: the QWidget to parent the TextEdit dialog to
         :type parent: :class:`PySide2.QtWidgets.QWidget`
 
-        :param isFrameless: ``True`` : dialog is frameless - ``False`` : dialog has a frame
+        :param isFrameless: ``True`` : the dialog is frameless - ``False`` : the dialog has a frame
         :type isFrameless: bool
         """
 
@@ -953,9 +1148,9 @@ class TextEditDialog(BaseDialog):
     # COMMANDS #
 
     def setText(self, text=None):
-        """set the text of the line edit
+        """set the text of the lineEdit
 
-        :param text: text used to set the line edit
+        :param text: text used to set the lineEdit
         :type text: str
         """
 
@@ -980,10 +1175,10 @@ class TextEditDialog(BaseDialog):
         else:
             self.setStatus(okEnabled=True)
 
-    def validation(self):
-        """validation of the dialog
+    def _validation(self):
+        """get the result of the dialog when ``ok`` is pressed
 
-        :return: ``Cancel`` : None - ``Ok`` : textEdit content
+        :return: ``Cancel`` : None - ``Ok`` : the content of the textEdit
         :rtype: None or str
         """
 

@@ -7,6 +7,7 @@ import os
 import ast
 import subprocess
 import shutil
+import webbrowser
 
 # imports local
 import cgp_generic_utils.python
@@ -34,9 +35,9 @@ class Path(object):
         self._path = os.path.abspath(path)
 
     def __eq__(self, path):
-        """check if the Path has the same name as the other path
+        """check if the Path is identical to the other path
 
-        :param path: path to check with
+        :param path: path to compare the path to
         :type path: str or :class:`cgp_generic_utils.files.Path`
 
         :return : ``True`` : the paths are identical - ``False`` : the paths are different
@@ -47,9 +48,9 @@ class Path(object):
         return self.path() == str(path)
 
     def __ne__(self, path):
-        """check if the Path has not the same name as the other path
+        """check if the Path is different from the other path
 
-        :param path: path to check with
+        :param path: path to compare the path to
         :type path: str or :class:`cgp_generic_utils.files.Path`
 
         :return : ``True`` : the paths are different - ``False`` : the paths are identical
@@ -60,19 +61,19 @@ class Path(object):
         return self.path() != str(path)
 
     def __repr__(self):
-        """the representation of the path
+        """get the representation of the path
 
         :return: the representation of the path
         :rtype: str
         """
 
         # return
-        return '{0}(\'{1}\')'.format(self.__class__.__name__, self.path())
+        return '{0}({1!r})'.format(self.__class__.__name__, self.path())
 
     def __str__(self):
-        """the print of the path
+        """get the string representation of the path
 
-        :return: the print of the path
+        :return: the string representation of the path
         :rtype: str
         """
 
@@ -81,59 +82,38 @@ class Path(object):
 
     # COMMANDS #
 
-    def baseName(self, withExtension=True):
-        """the baseName of the path
-
-        :param withExtension: ``True`` : baseName with extension - ``False`` : baseName without extension
-        :type withExtension: bool
+    def baseName(self):
+        """get the baseName of the path
 
         :return: the baseName of the path
         :rtype: str
         """
 
         # errors
-        if not os.path.isdir(self.path()) and not os.path.isfile(self.path()):
-            raise ValueError('{0} is not a valid path'.format(self.path()))
-
-        # get baseName
-        baseName = os.path.basename(self.path())
-
-        # execute
-        if os.path.isfile(self.path()) and not withExtension:
-            baseName = baseName.split('.')[0]
+        if not self.isFile() and not self.isDirectory():
+            raise ValueError('{0} is not an existing path'.format(self.path()))
 
         # return
-        return baseName
+        return os.path.basename(self.path())
 
     def directory(self):
-        """the parent directory of the path
+        """get the directory of the path
 
         :return: the directory of the path
         :rtype: :class:`cgp_generic_utils.files.Directory`
         """
 
-        # return
-        return cgp_generic_utils.files._api.entity(os.path.dirname(self.path()))
-
-    def extension(self):
-        """the extension of the path
-
-        :return: the extension of the path
-        :rtype: str
-        """
-
-        # get extension
-        extension = os.path.splitext(self.path())[-1][1:]
+        # errors
+        if not self.isFile() and not self.isDirectory():
+            raise ValueError('{0} is not an existing path'.format(self.path()))
 
         # return
-        return (extension
-                if extension and (self.isFile() or not self.isFile() and not self.isDirectory())
-                else None)
+        return cgp_generic_utils.files._api.FILE_TYPES['directory'](os.path.dirname(self.path()))
 
     def isDirectory(self):
         """check if the path is a directory
 
-        :return: ``True`` : the path is a directory - ``False`` the path is not a directory
+        :return: ``True`` : the path is a directory - ``False`` : the path is not a directory
         :rtype: bool
         """
 
@@ -151,25 +131,14 @@ class Path(object):
         return os.path.isfile(self.path())
 
     def path(self):
-        """the path of the entity on the file system
+        """get the path of the entity on the file system
 
-        :return: the path of the entity
+        :return: the path of the entity on the file system
         :rtype: str
         """
 
         # return
         return self._path
-
-    def pathType(self):
-        """the type of the path
-
-        :return: the type of the path
-        :rtype: str
-        """
-
-        # return
-        return (cgp_generic_utils.constants.FileFilter.DIRECTORY if self.isDirectory()
-                else cgp_generic_utils.constants.FileFilter.FILE)
 
 
 class File(Path):
@@ -184,20 +153,20 @@ class File(Path):
 
     @classmethod
     def create(cls, path, content=None, **__):
-        """create the file
+        """create a file
 
-        :param path: path of the file
+        :param path: the path of the file
         :type path: str
 
-        :param content: content of the file
+        :param content: the content to set into the file
         :type content: any
 
         :return: the created file
-        :rtype: :class:`cgp_generic_utils.files.File`
+        :rtype: File
         """
 
         # errors
-        if not Path(path).extension() == cls._extension:
+        if not cgp_generic_utils.files._api.getExtension(path) == cls._extension:
             raise ValueError('{0} is not a {1} path'.format(path, cls.__class__.__name__))
 
         # execute
@@ -209,17 +178,38 @@ class File(Path):
 
     # COMMANDS #
 
-    def copy(self, destinationDirectory=None, destinationName=None):
+    def baseName(self, withExtension=True):
+        """get the baseName of the file
+
+        :param withExtension: ``True`` : the baseName is returned with extension -
+                              ``False`` : the baseName is returned without extension
+        :type withExtension: bool
+
+        :return: the baseName of the file
+        :rtype: str
+        """
+
+        # get baseName
+        baseName = os.path.basename(self.path())
+
+        # return
+        return baseName if withExtension else baseName.split('.')[0]
+
+    def copy(self, destinationDirectory=None, destinationName=None, isPreservingMetadata=False):
         """copy the file
 
         :param destinationDirectory: directory where the copied file will be saved  - If None, same as original
         :type destinationDirectory: str or :class:`cgp_generic_utils.files.Directory`
 
-        :param destinationName: name of the copied file - If None, same as original - ! HAS TO BE WITHOUT EXTENSION !
+        :param destinationName: name of the copied file - If None, same as original - ``HAS TO BE WITHOUT EXTENSION``
         :type destinationName: str
 
+        :param isPreservingMetadata: ``True`` : the copy preserves the metadata -
+                                     ``False`` : the copy doesn't preserve the metadata
+        :type isPreservingMetadata: bool
+
         :return: the copied file
-        :rtype: :class:`cgp_generic_utils.files.File`
+        :rtype: File
         """
 
         # init
@@ -249,7 +239,10 @@ class File(Path):
             os.remove(destinationFileName)
 
         # copy the file
-        shutil.copy(self.path(), destinationFileName)
+        if isPreservingMetadata:
+            shutil.copy2(self.path(), destinationFileName)
+        else:
+            shutil.copy(self.path(), destinationFileName)
 
         # return
         return cgp_generic_utils.files._api.entity(destinationFileName)
@@ -257,7 +250,8 @@ class File(Path):
     def evaluate(self, asLiteral=True):
         """evaluate the content of the file
 
-        :param asLiteral: ``True`` : content evaluated with ast.literal_eval - ``False`` : content evaluated with eval
+        :param asLiteral: ``True`` : the content is evaluated with ast.literal_eval -
+                          ``False`` : the content is evaluated with eval
         :type asLiteral: bool
 
         :return: the evaluated content of the file
@@ -277,18 +271,36 @@ class File(Path):
         # execute
         return execfile(self.path())
 
-    def open(self):
-        """open the file in the script editor
+    def extension(self):
+        """get the extension of the file
+
+        :return: the extension of the file
+        :rtype: str
         """
 
-        # execute
-        subprocess.Popen([cgp_generic_utils.constants.Environment.SCRIPT_EDITOR, self.path()])
+        # return
+        return self._extension or cgp_generic_utils.files._api.getExtension(self.path())
+
+    def open_(self):
+        """open the file
+        """
+
+        # get text editor executable
+        textEditorExecutable = cgp_generic_utils.constants.Environment.TEXT_EDITOR_EXECUTABLE
+
+        # open in webbrowser if no default text editor is specified
+        if textEditorExecutable is NotImplemented or not os.path.isfile(textEditorExecutable):
+            webbrowser.open(self.path())
+
+        # open in default text editor
+        else:
+            subprocess.Popen([cgp_generic_utils.constants.Environment.TEXT_EDITOR_EXECUTABLE, self.path()])
 
     def read(self):
         """read the file
 
         :return: the content of the file
-        :rtype: any
+        :rtype: str
         """
 
         # execute
@@ -298,8 +310,35 @@ class File(Path):
         # return
         return data
 
+    def setBasename(self, basename):
+        """set the basename of the file
+
+        :param basename: the basename to set to the file
+        :type basename: str
+        """
+
+        # get new path
+        newPath = '{0}{1}{2}.{3}'.format(self.directory().path(),
+                                         os.sep,
+                                         basename,
+                                         self.extension())
+
+        # return
+        if self.path() == newPath:
+            return
+
+        # errors
+        if os.path.isfile(newPath):
+            raise ValueError('a file with the same basename is already existing')
+
+        # set basename
+        os.rename(self.path(), newPath)
+
+        # update path attribute
+        self._path = newPath
+
     def write(self, content):
-        """write data in the specified path file
+        """write the content in the file
 
         :param content: content to write in the file
         :type content: any
@@ -317,9 +356,9 @@ class Directory(Path):
 
     @classmethod
     def create(cls, path, **__):
-        """create
+        """create a directory
 
-        :param path: path of the file to create
+        :param path: path of the directory to create
         :type path: str
 
         :return: the created directory
@@ -335,36 +374,21 @@ class Directory(Path):
 
     # COMMANDS #
 
-    def baseName(self):
-        """the baseName of the directory
-
-        :return: the baseName of the directory
-        :rtype: str
-        """
-
-        # return
-        return super(Directory, self).baseName(withExtension=False)
-
     def content(self, fileFilters=None, fileExtensions=None, fileExtensionsIncluded=True):
-        """content of the directory
+        """get the content of the directory
 
-        :param fileFilters: filter of the directory children - default is ``cgp_generic_utils.constants.FileFilter.ALL``
-        :type fileFilters: list[str]
+        :param fileFilters: the filter of the directory children - default is ``cgp_generic_utils.constants.FileFilter.ALL``
+        :type fileFilters: list[:class:`cgp_generic_utils.constants.FileFilter`]
 
-        :param fileExtensions: extensions of the files to get - default is all extensions
+        :param fileExtensions: the extensions of the files to get - default is all extensions
         :type fileExtensions: list[str]
 
-        :param fileExtensionsIncluded: ``True`` : file extensions are included -
-                                       ``False`` : file extensions are excluded
+        :param fileExtensionsIncluded: ``True`` : the file extensions are included -
+                                       ``False`` : the file extensions are excluded
         :type fileExtensionsIncluded: bool
 
-        :return: the content of the directory
-        :rtype: list[:class:`cgp_generic_utils.files.Directory`,
-                :class:`cgp_generic_utils.files.File`,
-                :class:`cgp_generic_utils.files.JsonFile`,
-                :class:`cgp_generic_utils.files.PyFile`,
-                :class:`cgp_generic_utils.files.TxtFile`,
-                :class:`cgp_generic_utils.files.UiFile`]
+        :return: the directory content
+        :rtype: list[Directory, File]
         """
 
         # init
@@ -390,7 +414,7 @@ class Directory(Path):
             absChild = Path(os.path.join(self.path(), child))
 
             # get extension
-            extension = absChild.extension()
+            extension = cgp_generic_utils.files._api.getExtension(absChild.path())
 
             # check validity
             if (cgp_generic_utils.constants.FileFilter.DIRECTORY not in fileFilters and absChild.isDirectory()
@@ -410,3 +434,29 @@ class Directory(Path):
         # return
         return [cgp_generic_utils.files._api.entity(path)
                 for path in sorted(filterChildren['directories']) + sorted(filterChildren['files'])]
+
+    def setBasename(self, basename):
+        """set the basename of the directory
+
+        :param basename: the basename to set to the directory
+        :type basename: str
+        """
+
+        # get new path
+        newPath = '{0}{1}{2}'.format(self.directory().path(),
+                                     os.sep,
+                                     basename)
+
+        # return
+        if self.path() == newPath:
+            return
+
+        # errors
+        if os.path.isdir(newPath):
+            raise ValueError('a directory with the same basename is already existing')
+
+        # set basename
+        os.rename(self.path(), newPath)
+
+        # update path attribute
+        self._path = newPath

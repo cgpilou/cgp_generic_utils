@@ -4,7 +4,6 @@ Constants used to manipulate mirror data
 
 
 class MirrorMode(object):
-
     NO_MIRROR = 'noMirror'
     MIRROR = 'mirror'
     NEG_MIRROR = 'negMirror'
@@ -12,7 +11,6 @@ class MirrorMode(object):
 
 
 class MirrorPlane(object):
-
     XY = 'xy'
     YZ = 'yz'
     XZ = 'xz'

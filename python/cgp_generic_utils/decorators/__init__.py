@@ -2,12 +2,13 @@
 generic python decorators - also usable as contexts
 """
 
-# imports local
-from ._abstract import Decorator
-from ._performance import Timer, Profiler
-from ._qt import StatusDialog
+from ._generic import Decorator
+from ._misc import Deprecated
+from ._performance import Profiler, Timer
+from ._qt import StatusDialog, WithCursor
 
 
 __all__ = ['Decorator',
-           'Timer', 'Profiler',
-           'StatusDialog']
+           'Deprecated',
+           'Profiler', 'Timer',
+           'StatusDialog', 'WithCursor']

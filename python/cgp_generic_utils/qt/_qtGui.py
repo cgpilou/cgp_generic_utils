@@ -7,6 +7,7 @@ import os
 
 # imports third-parties
 import PySide2.QtGui
+import PySide2.QtCore
 
 # imports local
 import cgp_generic_utils.python
@@ -23,7 +24,7 @@ class Font(PySide2.QtGui.QFont):
         :param size: size of the font
         :type size: int
 
-        :param styles: styles of the font - [bold - italic - underline]
+        :param styles: styles of the font - ``[bold - italic - underline]``
         :type: list[:class:`cgp_generic_utils.constants.TypoStyle`]
         """
 
@@ -51,18 +52,100 @@ class Icon(PySide2.QtGui.QIcon):
 
     def __init__(self, image):
         """Icon class initialization
+
+        :param image: name of an image stored in the icon library
+        :type image: str
+        """
+
+        # init
+        self._path = os.path.join(cgp_generic_utils.constants.Environment.ICON_LIBRARY, image)
+
+        # execute
+        super(Icon, self).__init__(self._path)
+
+    # PROPERTIES #
+
+    @property
+    def path(self):
+        """get the path of the image used by the icon
+
+        :return: the path of the image
+        :rtype: str
+        """
+
+        # execute
+        return self._path
+
+
+class Movie(PySide2.QtGui.QMovie):
+    """QMovie with custom functionalities
+    """
+
+    # INIT #
+
+    def __init__(self, movie):
+        """Movie class initialization
+
+        :param movie: name of a movie stored in the icon library
+        :type movie: str
+        """
+
+        # init
+        self._path = os.path.join(cgp_generic_utils.constants.Environment.ICON_LIBRARY, movie)
+
+        # execute
+        super(Movie, self).__init__(self._path)
+
+    # PROPERTIES #
+
+    @property
+    def path(self):
+        """get the path of the movie used by the movie
+
+        :return: the path of the movie
+        :rtype: str
+        """
+
+        # execute
+        return self._path
+
+    # COMMANDS #
+
+    def setSize(self, size):
+        """set the size of the movie
+
+        :param size: size of the movie to set
+        :type size: list[int]
+        """
+
+        # execute
+        self.setScaledSize(PySide2.QtCore.QSize(*size))
+
+
+class Pixmap(PySide2.QtGui.QPixmap):
+    """QPixmap with custom functionalities
+    """
+
+    # INIT #
+
+    def __init__(self, image):
+        """Pixmap class initialization
+
+        :param image: name of an image stored in the icon library
+        :type image: str
         """
 
         #
         self._path = os.path.join(cgp_generic_utils.constants.Environment.ICON_LIBRARY, image)
 
         # execute
-        super(Icon, self).__init__(self._path)
+        super(Pixmap, self).__init__(self._path)
 
-    # COMMANDS #
+    # PROPERTIES #
 
+    @property
     def path(self):
-        """the path of the image used by the icon
+        """get the path of the image used by the pixmap
 
         :return: the path of the image
         :rtype: str
